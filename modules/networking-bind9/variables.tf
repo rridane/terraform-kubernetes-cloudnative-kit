@@ -76,3 +76,9 @@ variable "dnsdist_node_port" {
   default     = 30443
   description = "NodePort si dnsdist_service_type=NodePort"
 }
+
+variable "dnsdist_service_name" {
+  type        = string
+  default     = "dnsdist-svc"
+  description = "Nom du service dnsdist"
+}

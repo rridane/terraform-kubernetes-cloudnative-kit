@@ -217,7 +217,7 @@ resource "kubernetes_service" "dnsdist" {
   count = var.dnsdist_enabled ? 1 : 0
 
   metadata {
-    name      = "dnsdist"
+    name      = var.dnsdist_service_name
     namespace = var.namespace
     labels    = { app = "dnsdist" }
   }
