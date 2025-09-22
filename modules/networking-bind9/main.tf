@@ -15,7 +15,7 @@ resource "kubernetes_config_map" "bind9_conf" {
 
   data = {
     "named.conf.local" = templatefile("${path.module}/templates/named.conf.local.tmpl", { zones = local.zones_conf })
-    "named.conf.options" = file("${path.module}/config/named.conf.options")
+    "named.conf.options" = file("${path.module}/templates/named.conf.options")
   }
 
 }
