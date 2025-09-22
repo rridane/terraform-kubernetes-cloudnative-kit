@@ -73,7 +73,7 @@ variable "dnsdist_service_type" {
 
 variable "dnsdist_node_port" {
   type        = number
-  default     = 30443
+  default     = null
   description = "NodePort si dnsdist_service_type=NodePort"
 }
 
