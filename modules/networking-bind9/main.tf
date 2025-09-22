@@ -113,23 +113,23 @@ resource "kubernetes_deployment" "bind9" {
   }
 }
 
-# Service
 resource "kubernetes_service" "bind9" {
   metadata {
-    name      = "bind9-svc"
+    name      = var.service_name
     namespace = var.namespace
-    labels = { app = "bind9" }
+    labels    = { app = "bind9" }
   }
 
   spec {
     selector = { app = "bind9" }
-    type = "ClusterIP"
+    type     = var.service_type
 
     port {
+      port        = var.service_port
       target_port = 53
-      port        = 53
       name        = "dns"
       protocol    = "UDP"
+      node_port   = var.node_port
     }
   }
 }

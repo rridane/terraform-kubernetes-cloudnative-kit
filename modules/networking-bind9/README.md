@@ -44,7 +44,11 @@ module "bind9" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace Kubernetes où déployer Bind9 | `string` | n/a | yes |
-| <a name="input_zones"></a> [zones](#input\_zones) | Map des zones DNS à configurer.<br/>Chaque clé = nom de la zone (ex: my-domain.local).<br/>Chaque valeur contient :<br/>- zone\_file : chemin vers le fichier de zone (db.<zone>)<br/>- conf\_file : chemin vers le fichier de déclaration de la zone | <pre>map(object({<br/>    zone_file = string<br/>    conf_file = string<br/>  }))</pre> | n/a | yes |
+| <a name="input_node_port"></a> [node\_port](#input\_node\_port) | Optional fixed nodePort value (only if service\_type=NodePort) | `number` | `null` | no |
+| <a name="input_service_name"></a> [service\_name](#input\_service\_name) | Name of the Kubernetes Service | `string` | `"bind9-svc"` | no |
+| <a name="input_service_port"></a> [service\_port](#input\_service\_port) | Port exposed by the Kubernetes Service | `number` | `53` | no |
+| <a name="input_service_type"></a> [service\_type](#input\_service\_type) | Type of Kubernetes Service (ClusterIP, NodePort, LoadBalancer) | `string` | `"ClusterIP"` | no |
+| <a name="input_zones"></a> [zones](#input\_zones) | Map des zones DNS à configurer.<br/>Chaque clé = nom de la zone (ex: my-domain.local).<br/>Chaque valeur contient :<br/>- zone\_file : chemin vers le fichier de zone (db.<zone>)<br/>- conf\_file : chemin vers le fichier de déclaration de la zone | <pre>map(object({<br/>    zone_file = string<br/>  }))</pre> | n/a | yes |
 
 ## Outputs
 

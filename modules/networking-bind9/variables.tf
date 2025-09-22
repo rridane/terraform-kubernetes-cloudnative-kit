@@ -16,3 +16,27 @@ EOT
     zone_file = string
   }))
 }
+
+variable "service_type" {
+  description = "Type of Kubernetes Service (ClusterIP, NodePort, LoadBalancer)"
+  type        = string
+  default     = "ClusterIP"
+}
+
+variable "service_port" {
+  description = "Port exposed by the Kubernetes Service"
+  type        = number
+  default     = 53
+}
+
+variable "node_port" {
+  description = "Optional fixed nodePort value (only if service_type=NodePort)"
+  type        = number
+  default     = null
+}
+
+variable "service_name" {
+  description = "Name of the Kubernetes Service"
+  type        = string
+  default     = "bind9-svc"
+}
