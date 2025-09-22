@@ -80,9 +80,9 @@ resource "kubernetes_deployment" "bind9" {
           dynamic "volume_mount" {
             for_each = var.zones
             content {
-              mount_path = "/etc/bind/db.${volume_mount.key}"
+              mount_path = "/etc/bind/${volume_mount.key}"
               name       = "zone-${replace(volume_mount.key, ".", "-")}"
-              sub_path   = "db.${volume_mount.key}"
+              sub_path   = "${volume_mount.key}"
             }
           }
         }
