@@ -144,12 +144,12 @@ resource "kubernetes_config_map" "dnsdist_conf" {
 
   data = {
     "dnsdist.conf" = <<EOT
-      -- écoute DoH sur 443
-      addDOHLocal("0.0.0.0:${var.dnsdist_port}", "/etc/dnsdist/certs/cert.pem", "/etc/dnsdist/certs/key.pem")
+    -- écoute DoH sur ${var.dnsdist_port}
+    addDOHLocal("0.0.0.0:${var.dnsdist_port}", "/etc/dnsdist/certs/cert.pem", "/etc/dnsdist/certs/key.pem")
 
-      -- forward vers Bind9
-      newServer({address="${kubernetes_service.bind9.metadata[0].name}.${var.namespace}.svc.cluster.local:53"})
-      EOT
+    -- forward vers Bind9
+    newServer({address="${kubernetes_service.bind9.metadata[0].name}.${var.namespace}.svc.cluster.local", port=53})
+  EOT
   }
 }
 
