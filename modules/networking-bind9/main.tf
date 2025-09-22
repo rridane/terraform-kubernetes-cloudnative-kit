@@ -30,7 +30,7 @@ resource "kubernetes_config_map" "zones" {
   }
 
   data = {
-    "db.${each.key}" = file(each.value.zone_file)
+    "${each.key}" = file(each.value.zone_file)
   }
 }
 
