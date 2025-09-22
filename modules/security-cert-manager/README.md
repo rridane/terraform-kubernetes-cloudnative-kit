@@ -23,12 +23,12 @@ module "dnsdist_cert" {
   # SAN (Subject Alternative Names) → inclut l'IP ou les DNS
   dns_names = [
     "10.33.250.16",
-    "invoice.dev",
-    "bpce.invoice.dev"
+    "domain.dev",
+    "sub.domain.dev"
   ]
 
   # Issuer ou ClusterIssuer
-  issuer_name = "vault-issuer-invoice-dev"
+  issuer_name = "vault-issuer-domain-dev"
   issuer_kind = "ClusterIssuer"
 
   # Nom du Secret TLS qui contiendra cert + clé privée
@@ -41,9 +41,9 @@ module "bind9" {
   namespace = "system"
 
   zones = {
-    "invoice.dev" = {
-      zone_file = "${path.cwd}/zones/invoice.dev/db.invoice.dev"
-      conf_file = "${path.cwd}/zones/invoice.dev/zone.conf.tmpl"
+    "domain.dev" = {
+      zone_file = "${path.cwd}/zones/domain.dev/db.domain.dev"
+      conf_file = "${path.cwd}/zones/domain.dev/zone.conf.tmpl"
     }
   }
 
