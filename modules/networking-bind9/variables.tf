@@ -6,7 +6,7 @@ variable "namespace" {
 variable "zones" {
   description = <<EOT
 Map des zones DNS à configurer.
-Chaque clé = nom de la zone (ex: rr-dev.local).
+Chaque clé = nom de la zone (ex: my-domain.local).
 Chaque valeur contient :
 - zone_file : chemin vers le fichier de zone (db.<zone>)
 - conf_file : chemin vers le fichier de déclaration de la zone
