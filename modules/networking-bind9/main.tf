@@ -95,11 +95,10 @@ resource "kubernetes_deployment" "bind9" {
           }
         }
 
-        # Volumes pour zones
         dynamic "volume" {
           for_each = kubernetes_config_map.zones
           content {
-            name = volume.key
+            name = "zone-${replace(volume.key, ".", "-")}"
             config_map {
               name = volume.value.metadata[0].name
             }
