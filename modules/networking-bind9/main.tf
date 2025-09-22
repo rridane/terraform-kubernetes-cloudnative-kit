@@ -1,7 +1,11 @@
 locals {
-  # Génère le contenu complet de named.conf.local
   zones_conf = join("\n", [
-    for k, v in var.zones : file(v.conf_file)
+    for zone, _ in var.zones : <<EOT
+      zone "${zone}" {
+          type master;
+          file "/etc/bind/db.${zone}";
+      };
+      EOT
   ])
 }
 
@@ -80,7 +84,7 @@ resource "kubernetes_deployment" "bind9" {
           dynamic "volume_mount" {
             for_each = var.zones
             content {
-              mount_path = "/etc/bind/${volume_mount.key}"
+              mount_path = "/etc/bind/db.${volume_mount.key}"
               name       = "zone-${replace(volume_mount.key, ".", "-")}"
               sub_path   = "${volume_mount.key}"
             }

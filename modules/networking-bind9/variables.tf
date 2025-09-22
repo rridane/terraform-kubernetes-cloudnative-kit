@@ -14,6 +14,5 @@ EOT
 
   type = map(object({
     zone_file = string
-    conf_file = string
   }))
 }
