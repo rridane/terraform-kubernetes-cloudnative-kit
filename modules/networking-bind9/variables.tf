@@ -40,3 +40,39 @@ variable "service_name" {
   type        = string
   default     = "bind9-svc"
 }
+
+
+variable "dnsdist_enabled" {
+  type        = bool
+  default     = true
+  description = "Activer ou non le proxy dnsdist devant Bind9"
+}
+
+variable "dnsdist_image" {
+  type        = string
+  default     = "powerdns/dnsdist-18:latest"
+  description = "Image Docker de dnsdist"
+}
+
+variable "dnsdist_port" {
+  type        = number
+  default     = 443
+  description = "Port exposé pour DoH"
+}
+
+variable "dnsdist_cert_secret" {
+  type        = string
+  description = "Nom du secret Kubernetes contenant le certificat TLS (cert.pem + key.pem)"
+}
+
+variable "dnsdist_service_type" {
+  type        = string
+  default     = "NodePort"
+  description = "Type du service dnsdist (ClusterIP, NodePort, LoadBalancer)"
+}
+
+variable "dnsdist_node_port" {
+  type        = number
+  default     = 30443
+  description = "NodePort si dnsdist_service_type=NodePort"
+}

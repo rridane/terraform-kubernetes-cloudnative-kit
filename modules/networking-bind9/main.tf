@@ -133,3 +133,104 @@ resource "kubernetes_service" "bind9" {
     }
   }
 }
+
+resource "kubernetes_config_map" "dnsdist_conf" {
+  count = var.dnsdist_enabled ? 1 : 0
+
+  metadata {
+    name      = "dnsdist-conf"
+    namespace = var.namespace
+  }
+
+  data = {
+    "dnsdist.conf" = <<EOT
+      -- écoute DoH sur 443
+      addDOHLocal("0.0.0.0:${var.dnsdist_port}", "/etc/dnsdist/certs/cert.pem", "/etc/dnsdist/certs/key.pem")
+
+      -- forward vers Bind9
+      newServer({address="${kubernetes_service.bind9.metadata[0].name}.${var.namespace}.svc.cluster.local:53"})
+      EOT
+  }
+}
+
+resource "kubernetes_deployment" "dnsdist" {
+  count = var.dnsdist_enabled ? 1 : 0
+
+  metadata {
+    name      = "dnsdist"
+    namespace = var.namespace
+    labels = { app = "dnsdist" }
+  }
+
+  spec {
+    selector {
+      match_labels = { app = "dnsdist" }
+    }
+
+    template {
+      metadata {
+        labels = { app = "dnsdist" }
+      }
+
+      spec {
+        container {
+          name  = "dnsdist"
+          image = var.dnsdist_image
+
+          port {
+            container_port = var.dnsdist_port
+            protocol       = "TCP"
+          }
+
+          volume_mount {
+            name       = "dnsdist-conf"
+            mount_path = "/etc/dnsdist/dnsdist.conf"
+            sub_path   = "dnsdist.conf"
+          }
+
+          volume_mount {
+            name       = "dnsdist-certs"
+            mount_path = "/etc/dnsdist/certs"
+            read_only  = true
+          }
+        }
+
+        volume {
+          name = "dnsdist-conf"
+          config_map {
+            name = kubernetes_config_map.dnsdist_conf[0].metadata[0].name
+          }
+        }
+
+        volume {
+          name = "dnsdist-certs"
+          secret {
+            secret_name = var.dnsdist_cert_secret
+          }
+        }
+      }
+    }
+  }
+}
+
+resource "kubernetes_service" "dnsdist" {
+  count = var.dnsdist_enabled ? 1 : 0
+
+  metadata {
+    name      = "dnsdist"
+    namespace = var.namespace
+    labels    = { app = "dnsdist" }
+  }
+
+  spec {
+    selector = { app = "dnsdist" }
+    type     = var.dnsdist_service_type
+
+    port {
+      port        = var.dnsdist_port
+      target_port = var.dnsdist_port
+      protocol    = "TCP"
+      node_port   = var.dnsdist_node_port
+    }
+  }
+}
