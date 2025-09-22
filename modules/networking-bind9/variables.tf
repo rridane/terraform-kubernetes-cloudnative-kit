@@ -60,6 +60,12 @@ variable "dnsdist_port" {
   description = "Port exposé pour DoH"
 }
 
+variable "dnsdist_svc_port" {
+  type        = number
+  default     = 443
+  description = "Port exposé pour le service"
+}
+
 variable "dnsdist_cert_secret" {
   type        = string
   description = "Nom du secret Kubernetes contenant le certificat TLS (cert.pem + key.pem)"

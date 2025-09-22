@@ -225,7 +225,7 @@ resource "kubernetes_service" "dnsdist" {
     type     = var.dnsdist_service_type
 
     port {
-      port        = var.dnsdist_port
+      port        = var.dnsdist_svc_port
       target_port = var.dnsdist_port
       protocol    = "TCP"
       node_port   = var.dnsdist_node_port
