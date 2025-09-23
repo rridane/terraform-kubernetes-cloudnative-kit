@@ -1,20 +1,19 @@
 options {
     directory "/var/cache/bind";
 
-    recursion ${var.bind_recursion ? "yes" : "no"};
-    allow-query { ${join(";", var.bind_allow_query)}; };
-    allow-query-cache { ${join(";", var.bind_allow_query_cache)}; };
+    recursion ${bind_recursion ? "yes" : "no"};
+    allow-query { ${join(";", bind_allow_query)}; };
+    allow-query-cache { ${join(";", bind_allow_query_cache)}; };
 
-    %{ if length(var.bind_forwarders) > 0 }
-        forwarders {
-          %{ for f in var.bind_forwarders }
-          ${f};
-          %{ endfor }
-        };
-    %{ endif }
+%{ if length(bind_forwarders) > 0 }
+    forwarders {
+      %{ for f in bind_forwarders }
+      ${f};
+      %{ endfor }
+    };
+%{ endif }
 
-    listen-on-v6 { ${var.bind_listen_on_v6 ? "any" : "none"}; };
+    listen-on-v6 { ${bind_listen_on_v6 ? "any" : "none"}; };
 
-    dnssec-validation ${var.bind_dnssec_validation};
+    dnssec-validation ${bind_dnssec_validation};
 };
-
