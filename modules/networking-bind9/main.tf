@@ -182,7 +182,7 @@ resource "kubernetes_deployment" "dnsdist" {
               set -eu
               IP=$(getent hosts ${var.service_name}.${var.namespace}.svc.cluster.local | awk '{print $1}')
               echo "addDOHLocal(\"0.0.0.0:${var.dnsdist_port}\", \"/etc/dnsdist/certs/tls.crt\", \"/etc/dnsdist/certs/tls.key\")" > /work-dir/dnsdist.conf
-              echo "newServer({address=\"${IP}\", port=53})" >> /work-dir/dnsdist.conf
+              echo "newServer({address=\"$$IP\", port=53})" >> /work-dir/dnsdist.conf
             EOT
           ]
 
@@ -191,6 +191,7 @@ resource "kubernetes_deployment" "dnsdist" {
             mount_path = "/work-dir"
           }
         }
+
 
         # Conteneur principal dnsdist
         container {
