@@ -17,8 +17,7 @@ resource "kubernetes_config_map" "bind9_conf" {
 
   data = {
     "named.conf.local" = templatefile("${path.module}/templates/named.conf.local.tmpl", { zones = local.zones_conf })
-    "named.conf.options" = var.bind_custom_options_file != "" ? file(var.bind_custom_options_file) :
-      templatefile("${path.module}/templates/named.conf.options.tmpl", {
+    "named.conf.options" = var.bind_custom_options_file != "" ? file(var.bind_custom_options_file) : templatefile("${path.module}/templates/named.conf.options.tmpl", {
         bind_recursion         = var.bind_recursion
         bind_allow_query       = var.bind_allow_query
         bind_allow_query_cache = var.bind_allow_query_cache
