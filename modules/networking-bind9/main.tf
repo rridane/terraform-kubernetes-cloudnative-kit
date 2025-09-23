@@ -179,9 +179,9 @@ resource "kubernetes_deployment" "dnsdist" {
             "sh", "-c",
             <<-EOT
               set -eu
-              IP=$(nslookup ${var.service_name}.${var.namespace}.svc.cluster.local | awk '/^Address / { print $3; exit }')
+              IP=$(nslookup bind9-svc.bind9.svc.cluster.local | grep bind9 -A 1 | grep Address | awk -F ": " '{print $2}')
               echo "addDOHLocal(\"0.0.0.0:${var.dnsdist_port}\", \"/etc/dnsdist/certs/tls.crt\", \"/etc/dnsdist/certs/tls.key\")" > /work-dir/dnsdist.conf
-              echo "newServer({address=\"$$IP\", port=53})" >> /work-dir/dnsdist.conf
+              echo "newServer({address=\"$$IP\"})" >> /work-dir/dnsdist.conf
             EOT
           ]
 
