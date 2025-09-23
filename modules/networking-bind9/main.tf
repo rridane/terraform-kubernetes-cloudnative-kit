@@ -1,6 +1,6 @@
 locals {
   zones_conf = join("\n", [
-    for zone, _ in var.zones : <<EOT
+    for zone, _ in var.bind9_zones : <<EOT
       zone "${zone}" {
           type master;
           file "/etc/bind/db.${zone}";
@@ -8,8 +8,6 @@ locals {
       EOT
   ])
 }
-
-# ConfigMap pour named.conf.local et named.conf.options
 resource "kubernetes_config_map" "bind9_conf" {
 
   metadata {
@@ -19,14 +17,22 @@ resource "kubernetes_config_map" "bind9_conf" {
 
   data = {
     "named.conf.local" = templatefile("${path.module}/templates/named.conf.local.tmpl", { zones = local.zones_conf })
-    "named.conf.options" = file("${path.module}/templates/named.conf.options")
+    "named.conf.options" = var.bind_custom_options_file != "" ? file(var.bind_custom_options_file) :
+      templatefile("${path.module}/templates/named.conf.options.tmpl", {
+        bind_recursion         = var.bind_recursion
+        bind_allow_query       = var.bind_allow_query
+        bind_allow_query_cache = var.bind_allow_query_cache
+        bind_forwarders        = var.bind_forwarders
+        bind_listen_on_v6      = var.bind_listen_on_v6
+        bind_dnssec_validation = var.bind_dnssec_validation
+      })
   }
 
 }
 
 # ConfigMap pour chaque zone
 resource "kubernetes_config_map" "zones" {
-  for_each = var.zones
+  for_each = var.bind9_zones
 
   metadata {
     name      = "zone-${replace(each.key, ".", "-")}"
@@ -82,7 +88,7 @@ resource "kubernetes_deployment" "bind9" {
 
           # Mount zones
           dynamic "volume_mount" {
-            for_each = var.zones
+            for_each = var.bind9_zones
             content {
               mount_path = "/etc/bind/db.${volume_mount.key}"
               name       = "zone-${replace(volume_mount.key, ".", "-")}"
@@ -115,21 +121,21 @@ resource "kubernetes_deployment" "bind9" {
 
 resource "kubernetes_service" "bind9" {
   metadata {
-    name      = var.service_name
+    name      = var.bind9_service_name
     namespace = var.namespace
     labels = { app = "bind9" }
   }
 
   spec {
     selector = { app = "bind9" }
-    type = var.service_type
+    type = var.bind9_service_type
 
     port {
-      port        = var.service_port
+      port        = var.bind9_service_port
       target_port = 53
       name        = "dns"
       protocol    = "UDP"
-      node_port   = var.node_port
+      node_port   = var.bind9_node_port
     }
   }
 }
@@ -181,7 +187,7 @@ resource "kubernetes_deployment" "dnsdist" {
               set -eu
               IP=$(nslookup bind9-svc.bind9.svc.cluster.local | grep bind9 -A 1 | grep Address | awk -F ": " '{print $2}')
               echo "addDOHLocal(\"0.0.0.0:${var.dnsdist_port}\", \"/etc/dnsdist/certs/tls.crt\", \"/etc/dnsdist/certs/tls.key\")" > /work-dir/dnsdist.conf
-              echo "newServer({address=\"$$IP\", checkName=\"${var.check_resolve_dns}\"})" >> /work-dir/dnsdist.conf
+              echo "newServer({address=\"$$IP\", checkName=\"${var.dnsdist_check_resolve_dns}\"})" >> /work-dir/dnsdist.conf
             EOT
           ]
 
