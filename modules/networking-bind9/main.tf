@@ -157,7 +157,7 @@ resource "kubernetes_deployment" "dnsdist" {
   metadata {
     name      = "dnsdist"
     namespace = var.namespace
-    labels = { app = "dnsdist" }
+    labels    = { app = "dnsdist" }
   }
 
   spec {
@@ -171,6 +171,28 @@ resource "kubernetes_deployment" "dnsdist" {
       }
 
       spec {
+        # Init container pour résoudre l'IP et générer dnsdist.conf
+        init_container {
+          name  = "init-dnsdist-conf"
+          image = "busybox:1.36"
+
+          command = [
+            "sh", "-c",
+            <<-EOT
+              set -eu
+              IP=$(getent hosts ${var.service_name}.${var.namespace}.svc.cluster.local | awk '{print $1}')
+              echo "addDOHLocal(\"0.0.0.0:${var.dnsdist_port}\", \"/etc/dnsdist/certs/tls.crt\", \"/etc/dnsdist/certs/tls.key\")" > /work-dir/dnsdist.conf
+              echo "newServer({address=\"${IP}\", port=53})" >> /work-dir/dnsdist.conf
+            EOT
+          ]
+
+          volume_mount {
+            name       = "dnsdist-generated"
+            mount_path = "/work-dir"
+          }
+        }
+
+        # Conteneur principal dnsdist
         container {
           name  = "dnsdist"
           image = var.dnsdist_image
@@ -181,7 +203,7 @@ resource "kubernetes_deployment" "dnsdist" {
           }
 
           volume_mount {
-            name       = "dnsdist-conf"
+            name       = "dnsdist-generated"
             mount_path = "/etc/dnsdist/dnsdist.conf"
             sub_path   = "dnsdist.conf"
           }
@@ -193,11 +215,10 @@ resource "kubernetes_deployment" "dnsdist" {
           }
         }
 
+        # Volumes
         volume {
-          name = "dnsdist-conf"
-          config_map {
-            name = kubernetes_config_map.dnsdist_conf[0].metadata[0].name
-          }
+          name = "dnsdist-generated"
+          empty_dir {}
         }
 
         volume {
@@ -210,6 +231,7 @@ resource "kubernetes_deployment" "dnsdist" {
     }
   }
 }
+
 
 resource "kubernetes_service" "dnsdist" {
   count = var.dnsdist_enabled ? 1 : 0
