@@ -181,7 +181,7 @@ resource "kubernetes_deployment" "dnsdist" {
               set -eu
               IP=$(nslookup bind9-svc.bind9.svc.cluster.local | grep bind9 -A 1 | grep Address | awk -F ": " '{print $2}')
               echo "addDOHLocal(\"0.0.0.0:${var.dnsdist_port}\", \"/etc/dnsdist/certs/tls.crt\", \"/etc/dnsdist/certs/tls.key\")" > /work-dir/dnsdist.conf
-              echo "newServer({address=\"$$IP\", checkName = "${var.check_resolve_dns}", mustResolve = true})" >> /work-dir/dnsdist.conf
+              echo "newServer({address=\"$$IP\", checkName=\"${var.check_resolve_dns}\"})" >> /work-dir/dnsdist.conf
             EOT
           ]
 
