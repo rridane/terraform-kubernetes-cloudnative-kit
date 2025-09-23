@@ -171,7 +171,6 @@ resource "kubernetes_deployment" "dnsdist" {
       }
 
       spec {
-        # Init container pour résoudre l'IP et générer dnsdist.conf
         init_container {
           name  = "init-dnsdist-conf"
           image = "busybox:1.36"
@@ -180,7 +179,7 @@ resource "kubernetes_deployment" "dnsdist" {
             "sh", "-c",
             <<-EOT
               set -eu
-              IP=$(getent hosts ${var.service_name}.${var.namespace}.svc.cluster.local | awk '{print $1}')
+              IP=$(nslookup ${var.service_name}.${var.namespace}.svc.cluster.local | awk '/^Address / { print $3; exit }')
               echo "addDOHLocal(\"0.0.0.0:${var.dnsdist_port}\", \"/etc/dnsdist/certs/tls.crt\", \"/etc/dnsdist/certs/tls.key\")" > /work-dir/dnsdist.conf
               echo "newServer({address=\"$$IP\", port=53})" >> /work-dir/dnsdist.conf
             EOT
