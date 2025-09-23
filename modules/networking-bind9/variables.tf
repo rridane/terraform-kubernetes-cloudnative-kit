@@ -88,3 +88,9 @@ variable "dnsdist_service_name" {
   default     = "dnsdist-svc"
   description = "Nom du service dnsdist"
 }
+
+variable "check_resolve_dns" {
+  type        = string
+  default     = "localhost"
+  description = "Domain to check if dns downstream is up"
+}
