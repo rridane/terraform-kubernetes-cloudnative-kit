@@ -5,14 +5,10 @@ locals {
   exporters_files = fileset(var.exporters_dir, "*.y*ml")
   connectors_files = fileset(var.connectors_dir, "*.y*ml")
 
-  receivers  = length(local.receivers_files)  > 0 ?
-    merge([for f in local.receivers_files : yamldecode(file("${var.receivers_dir}/${f}"))]...) : {}
-  processors = length(local.processors_files) > 0 ?
-    merge([for f in local.processors_files : yamldecode(file("${var.processors_dir}/${f}"))]...) : {}
-  exporters  = length(local.exporters_files)  > 0 ?
-    merge([for f in local.exporters_files : yamldecode(file("${var.exporters_dir}/${f}"))]...) : {}
-  connectors = length(local.connectors_files) > 0 ?
-    merge([for f in local.connectors_files : yamldecode(file("${var.connectors_dir}/${f}"))]...) : {}
+  receivers  = length(local.receivers_files)  > 0 ? merge([for f in local.receivers_files : yamldecode(file("${var.receivers_dir}/${f}"))]...) : {}
+  processors = length(local.processors_files) > 0 ? merge([for f in local.processors_files : yamldecode(file("${var.processors_dir}/${f}"))]...) : {}
+  exporters  = length(local.exporters_files)  > 0 ? merge([for f in local.exporters_files : yamldecode(file("${var.exporters_dir}/${f}"))]...) : {}
+  connectors = length(local.connectors_files) > 0 ? merge([for f in local.connectors_files : yamldecode(file("${var.connectors_dir}/${f}"))]...) : {}
 
   # Config collector finale
   otel_config = {

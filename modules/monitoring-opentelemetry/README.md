@@ -4,8 +4,6 @@ Ce module permet de **générer et déployer automatiquement** une ressource
 `OpenTelemetryCollector` (CRD de l’OpenTelemetry Operator) à partir de fragments
 de configuration organisés dans des dossiers dédiés (`receivers/`, `processors/`, `exporters/`, `connectors/`).
 
----
-
 ## 📂 Structure recommandée
 
 Nous conseillons d’organiser vos fragments de configuration dans un répertoire **`otel.conf.d/`** afin de séparer proprement les familles de composants :  
@@ -22,8 +20,6 @@ otel.conf.d/
 ```
 
 Chaque fichier contient la définition d’un composant unique, avec une **clé racine** correspondant à son nom.
-
----
 
 ## Exemples de fichiers
 
@@ -53,25 +49,6 @@ logging:
 (dossier vide ou fichiers de connecteurs si nécessaires)
 ```
 
----
-
-## ⚙️ Variables
-
-| Variable             | Type        | Description                                       | Exemple                  |
-|----------------------|-------------|---------------------------------------------------|--------------------------|
-| `namespace`          | `string`    | Namespace Kubernetes où déployer le collector     | `observability`          |
-| `receivers_dir`      | `string`    | Chemin vers le dossier receivers                  | `./receivers`            |
-| `processors_dir`     | `string`    | Chemin vers le dossier processors                 | `./processors`           |
-| `exporters_dir`      | `string`    | Chemin vers le dossier exporters                  | `./exporters`            |
-| `connectors_dir`     | `string`    | Chemin vers le dossier connectors                 | `./connectors`           |
-| `extra_args`         | `set(string)` | Liste d’arguments supplémentaires                | `["--feature-gates=filelog.allowHeaderMetadataParsing"]` |
-| `labels`             | `map(string)` | Labels appliqués à la ressource                  | `{ app = "otel" }`       |
-| `replicas`           | `number`   | Nombre de replicas                                | `3`                      |
-| `serviceAccountName` | `string`   | Nom du ServiceAccount                             | `otel-collector`         |
-| `mode`               | `string`   | Mode du collector (deployment, daemonset, etc.)   | `deployment`             |
-
----
-
 ## 🛠️ Exemple d’utilisation
 
 ```hcl
@@ -94,8 +71,6 @@ module "otel_collector" {
   ]
 }
 ```
-
----
 
 ## 📜 Exemple rendu final
 
@@ -139,3 +114,25 @@ spec:
               - logging
 ```
 
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_connectors_dir"></a> [connectors\_dir](#input\_connectors\_dir) | Dossier ou trouver les fichiers connectors | `string` | n/a | yes |
+| <a name="input_exporters_dir"></a> [exporters\_dir](#input\_exporters\_dir) | Dossier ou trouver les fichiers exporters | `string` | n/a | yes |
+| <a name="input_extra_args"></a> [extra\_args](#input\_extra\_args) | list of extra args parameters | `set(string)` | n/a | yes |
+| <a name="input_labels"></a> [labels](#input\_labels) | otel labels | `map(string)` | n/a | yes |
+| <a name="input_mode"></a> [mode](#input\_mode) | mode de déploiement | `string` | n/a | yes |
+| <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace Kubernetes ou déployer opentelemetry | `string` | n/a | yes |
+| <a name="input_processors_dir"></a> [processors\_dir](#input\_processors\_dir) | Dossier ou trouver les fichiers processors | `string` | n/a | yes |
+| <a name="input_receivers_dir"></a> [receivers\_dir](#input\_receivers\_dir) | Dossier ou trouver les fichiers receivers | `string` | n/a | yes |
+| <a name="input_replicas"></a> [replicas](#input\_replicas) | replicas | `number` | n/a | yes |
+| <a name="input_serviceAccountName"></a> [serviceAccountName](#input\_serviceAccountName) | service account | `string` | n/a | yes |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_otel_collector_manifest"></a> [otel\_collector\_manifest](#output\_otel\_collector\_manifest) | Manifeste CRD OpenTelemetryCollector complet |
+| <a name="output_otel_config_yaml"></a> [otel\_config\_yaml](#output\_otel\_config\_yaml) | Config complète générée pour l'OpenTelemetry Collector |
