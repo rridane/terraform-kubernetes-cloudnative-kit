@@ -22,38 +22,42 @@ zones/
 ## 🚀 Exemple d’utilisation
 
 ```hcl
-module "bind9" {
-  source    = "./terraform-modules/bind9"
-  namespace = "system"
-
-  # Définition des zones
-  zones = {
-    "my-domain.local" = {
-      zone_file = "${path.cwd}/zones/my-zone.tld/my-zone.tld"
-      conf_file = "${path.cwd}/zones/my-zone.tld/zone.conf.tmpl"
+module "bind9_zones" {
+  source    = "rridane/cloudnative-kit/kubernetes//modules/networking-bind9"
+  version   = "0.2.27"
+  namespace = "bind9"
+  bind9_zones = {
+    "domain.dev" = {
+      zone_file = "${path.cwd}/config/domain.dev"
+      conf_file = "${path.cwd}/config/domain.dev.conf"
     }
-    "example.com" = {
-      zone_file = "${path.cwd}/zones/example.com/db.example.com"
-      conf_file = "${path.cwd}/zones/example.com/zone.conf.tmpl"
+    "sub.domain.dev" = {
+      zone_file = "${path.cwd}/config/sub.domain.dev"
     }
   }
-
-  # Service Bind9 classique
-  service_name = "bind9-svc"
-  service_type = "NodePort"
-  service_port = 30053
-  node_port    = 30053
+  bind9_service_name = "bind9-svc"
+  bind9_service_type = "ClusterIP"
+  bind9_service_port = 53
 
   # Activation de dnsdist pour DNS-over-HTTPS
   dnsdist_enabled      = true
   dnsdist_image        = "powerdns/dnsdist-18:latest"
-  dnsdist_port         = 443
-  dnsdist_service_type = "NodePort"
-  dnsdist_node_port    = 30443
+  dnsdist_port         = 8443
+  dnsdist_service_type = "ClusterIP"
 
   # Secret Kubernetes contenant ton certificat TLS
   # (généré avec SAN = IP du LB ou domaine associé)
-  dnsdist_cert_secret  = "dnsdist-tls"
+  dnsdist_cert_secret       = module.dnsdist_cert.secret_name
+  dnsdist_service_name      = "dnsdist-svc"
+  dnsdist_svc_port          = 8443
+  dnsdist_check_resolve_dns = "keycloak.sub.domain.dev"
+
+  bind_recursion = true
+  bind_allow_query = ["any"]
+  bind_allow_query_cache = ["any"]
+  bind_forwarders = [
+    "my-internal-dns",
+  ]
 }
 ```
 

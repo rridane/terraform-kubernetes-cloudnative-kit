@@ -8,23 +8,22 @@ Il permet de générer un certificat TLS à partir d’un **Issuer** ou **Cluste
 ## 🚀 Exemple d’utilisation
 
 ```hcl
-module "dnsdist_cert" {
-  source     = "./terraform-modules/cert-manager-certificate"
+module "certificates" {
+  source    = "rridane/cloudnative-kit/kubernetes//modules/security-cer--manager"
 
   # Nom de la ressource Certificate
-  name       = "dnsdist-cert"
+  name       = "mon-domain-cert"
 
   # Namespace Kubernetes
-  namespace  = "system"
+  namespace  = "monnamespace"
 
   # Nom commun (optionnel, SAN prime toujours)
-  common_name = "10.33.250.16"
+  common_name = "mon.domain.dev"
 
   # SAN (Subject Alternative Names) → inclut l'IP ou les DNS
   dns_names = [
-    "10.33.250.16",
     "domain.dev",
-    "sub.domain.dev"
+    "sub.mon.domain.dev"
   ]
 
   # Issuer ou ClusterIssuer
@@ -32,33 +31,25 @@ module "dnsdist_cert" {
   issuer_kind = "ClusterIssuer"
 
   # Nom du Secret TLS qui contiendra cert + clé privée
-  secret_name = "dnsdist-tls"
+  secret_name = "mon-domain-tls"
 }
 
-# Exemple d’utilisation avec dnsdist
-module "bind9" {
-  source    = "./terraform-modules/bind9"
-  namespace = "system"
-
-  zones = {
+module "bind9_zones" {
+  source    = "rridane/cloudnative-kit/kubernetes//modules/networking-bind9"
+  version   = "0.2.27"
+  namespace = "bind9"
+  bind9_zones = {
     "domain.dev" = {
-      zone_file = "${path.cwd}/zones/domain.dev/db.domain.dev"
-      conf_file = "${path.cwd}/zones/domain.dev/zone.conf.tmpl"
+      zone_file = "${path.cwd}/config/domain.dev"
+      conf_file = "${path.cwd}/config/domain.dev.conf"
+    }
+    "sub.domain.dev" = {
+      zone_file = "${path.cwd}/config/sub.domain.dev"
     }
   }
-
-  service_name         = "bind9-svc"
-  service_type         = "NodePort"
-  service_port         = 30053
-  node_port            = 30053
-
-  dnsdist_enabled      = true
-  dnsdist_port         = 443
-  dnsdist_service_type = "NodePort"
-  dnsdist_node_port    = 30443
-
-  # On récupère directement le Secret généré par cert-manager
-  dnsdist_cert_secret  = module.dnsdist_cert.secret_name
+  bind9_service_name = "bind9-svc"
+  bind9_service_type = "ClusterIP"
+  bind9_service_port = 53
 }
 ```
 

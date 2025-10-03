@@ -1,0 +1,14 @@
+demo:
+  namespace: demo
+  routes:
+    - name: myapp
+      host: myapp.example.com
+      pathPrefix: /
+      target-service: myapp-svc
+      port: 8080
+      middlewares:
+        - type: strip-prefix
+          prefix: /api
+        - type: override-headers
+          key: X-Env
+          value: staging
