@@ -11,6 +11,16 @@ locals {
         external_enabled = lookup(secret, "external_secret", {})["enabled"]
         external_name    = lookup(secret, "external_secret", {})["name"]
         external_ns      = lookup(secret, "external_secret", {})["namespace"]
+        secret_store_name     = lookup(
+          lookup(secret, "external_secret", {}),
+          "secret_store",
+          {}
+        )["name"]
+        secret_store_kind     = lookup(
+          lookup(secret, "external_secret", {}),
+          "secret_store",
+          {}
+        )["kind"]
       }
     ]
   ])
@@ -87,8 +97,8 @@ resource "kubernetes_manifest" "external_secret" {
     spec = {
       refreshInterval = "1h"
       secretStoreRef = {
-        name = "vault-secret-store"
-        kind = "ClusterSecretStore"
+        name = each.value["secret_store_name"]
+        kind = each.value["secret_store_kind"]
       }
       target = {
         name           = each.value["external_name"]
