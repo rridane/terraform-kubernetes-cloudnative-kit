@@ -106,6 +106,11 @@ resource "kubernetes_manifest" "external_secret" {
     }
   }
 
+  field_manager {
+    name            = "terraform"
+    force_conflicts = true
+  }
+
   depends_on = [
     vault_kv_secret_v2.secrets
   ]
