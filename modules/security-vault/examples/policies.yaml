@@ -1,0 +1,9 @@
+capabilities:
+  - path: "apps/grafana"
+    capabilities: ["update"]
+    description: "vault grafana admin"
+    name: "vault_grafana_maintainer"
+  - path: "apps/grafana"
+    capabilities: ["read", "list"]
+    description: "vault grafana read policy"
+    name: "vault_grafana_read"

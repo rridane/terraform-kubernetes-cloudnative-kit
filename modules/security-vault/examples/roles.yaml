@@ -1,0 +1,25 @@
+roles:
+  - name: "grafana-reader"
+    type: "kubernetes"
+    namespace: "monitoring"
+    service_accounts: ["grafana"]
+    policies: ["vault_prometheus_read"]
+    ttl_hours: 1
+
+  - name: "ci-pipeline"
+    type: "approle"
+    policies: ["vault_prometheus_admin"]
+    token_ttl_hours: 1
+    token_max_ttl_hours: 8
+
+  - name: "oidc-developer"
+    type: "oidc"
+    policies: ["vault_prometheus_read"]
+    token_ttl_hours: 8
+    bound_audiences:
+      - "https://keycloak.example.com/realms/myrealm"
+    bound_claims:
+      groups: "dev,ops"
+      email_verified: "true"
+    allowed_redirect_uris:
+      - "https://vault.example.com/ui/vault/auth/oidc/oidc/callback"

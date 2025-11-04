@@ -1,0 +1,17 @@
+backends:
+  oidc:
+    managed: true
+    config:
+      description: "Keycloak authentification backend"
+      oidc_discovery_url: "https://keycloak.example.com/realms/myrealm"
+      default_role: "default-oidc-role"
+      # Paramètres pour le secret Vault
+      oidc_client_secret_vault_mount: "kv-adm"
+      oidc_client_secret_vault_path: "apps/keycloak/base_realm/client_credentials"
+      oidc_client_id_vault_key: "client_id"
+      oidc_client_secret_vault_key: "client_secret"
+  kubernetes:
+    # Géré directement via vault pour utiliser le token kube
+    managed: false
+  app_role:
+    managed: true
