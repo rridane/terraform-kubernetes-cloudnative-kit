@@ -108,7 +108,7 @@ resource "kubernetes_manifest" "external_secret" {
       namespace = each.value["external_ns"]
     }
     spec = {
-      refreshInterval = "2s"
+      refreshInterval = "1h"
       secretStoreRef = {
         name = each.value["secret_store_name"]
         kind = each.value["secret_store_kind"]
