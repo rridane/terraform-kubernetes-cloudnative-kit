@@ -1,6 +1,5 @@
-
 variable "realm_id" {
-  description = "Realm où créer les groupes"
+  description = "ID du Realm"
   type        = string
 }
 
@@ -9,35 +8,40 @@ variable "clients" {
   type        = map(string)
 }
 
+variable "realm_roles_ids" {
+  description = "Nom des realm roles → ID"
+  type        = map(string)
+}
+
+variable "client_roles_ids" {
+  description = "Nom des client roles → ID"
+  type        = map(string)
+}
+
 variable "groups" {
   description = <<EOF
-Arborescence des groupes.
-Structure :
-groups = {
-  platform = {
-    attributes   = { foo = "bar" }
-    realm_roles  = ["roleA"]
-    client_roles = {
-      grafana = ["viewer"]
-      argocd  = ["readonly"]
-    }
-    subgroups = {
-      admins = {
-        realm_roles = ["roleB"]
-      }
-    }
-  }
-}
-EOF
+Liste plate des groupes Keycloak.
 
-  type = map(object({
-    attributes    = optional(map(string), {})
-    realm_roles   = optional(list(string), [])
-    client_roles  = optional(map(list(string)), {})
-    subgroups     = optional(map(object({
-      attributes    = optional(map(string), {})
-      realm_roles   = optional(list(string), [])
-      client_roles  = optional(map(list(string)), {})
-    })), {})
+Exemple :
+groups = [
+  {
+    name         = "platform"
+    parent       = null
+    realm_roles  = ["platform.readonly"]
+    client_roles = { grafana = ["viewer"] }
+  },
+  {
+    name         = "platform/admins"
+    parent       = "platform"
+    realm_roles  = ["platform.admin"]
+  }
+]
+EOF
+  type = list(object({
+    name         = string
+    parent       = string
+    realm_roles  = optional(list(string), [])
+    client_roles = optional(map(list(string)), {})
+    attributes   = optional(map(string), {})
   }))
 }

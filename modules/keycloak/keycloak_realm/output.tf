@@ -1,0 +1,12 @@
+output "realm_id" {
+  description = "ID du realm créé"
+  value       = keycloak_realm.realm.id
+}
+
+output "clients_output" {
+  description = "Mapping des clients Keycloak (nom → client_id)"
+  value = {
+    for client_name, client_res in keycloak_openid_client.clients :
+    client_name => client_res.id
+  }
+}
