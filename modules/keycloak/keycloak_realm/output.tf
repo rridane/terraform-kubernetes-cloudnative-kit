@@ -10,3 +10,12 @@ output "clients_output" {
     client_name => client_res.id
   }
 }
+
+output "client_secrets" {
+  description = "Secrets des clients CONFIDENTIAL (nom → secret). Chaîne vide pour les clients PUBLIC."
+  sensitive   = true
+  value = {
+    for client_name, client_res in keycloak_openid_client.clients :
+    client_name => client_res.client_secret
+  }
+}
