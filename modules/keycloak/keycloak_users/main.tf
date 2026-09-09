@@ -1,9 +1,7 @@
-########################################
-# Résolution du realm par NOM
-########################################
-data "keycloak_realm" "this" {
-  realm = var.realm
-}
+# NB : dans Keycloak, l'id d'un realm EST son nom -> on utilise var.realm
+# directement comme realm_id. Pas de data source (qui, différée par un
+# depends_on côté appelant, rendrait realm_id "known after apply" et
+# forcerait un remplacement du user via son attribut ForceNew realm_id).
 
 ########################################
 # Résolution des groupes par NOM (unique)
@@ -14,7 +12,7 @@ locals {
 
 data "keycloak_group" "by_name" {
   for_each = local.all_group_names
-  realm_id = data.keycloak_realm.this.id
+  realm_id = var.realm
   name     = each.key
 }
 
@@ -25,7 +23,7 @@ data "keycloak_group" "by_name" {
 # Mode 1: on **gère** les users (création/maj)
 resource "keycloak_user" "user" {
   for_each       = var.manage_users ? var.users : {}
-  realm_id       = data.keycloak_realm.this.id
+  realm_id       = var.realm
   username       = each.key
   email          = each.value.email
   enabled        = coalesce(try(each.value.enabled, null), true)
@@ -56,7 +54,7 @@ resource "keycloak_user" "user" {
 # (nécessite que le provider Keycloak expose data.keycloak_user ; sinon laissez manage_users=true)
 data "keycloak_user" "existing" {
   for_each = var.manage_users ? {} : var.users
-  realm_id = data.keycloak_realm.this.id
+  realm_id = var.realm
   username = each.key
 }
 
@@ -73,7 +71,7 @@ locals {
 resource "keycloak_user_groups" "membership" {
   for_each = var.users
 
-  realm_id = data.keycloak_realm.this.id
+  realm_id = var.realm
   user_id  = local.user_ids[each.key]
 
   group_ids = [
