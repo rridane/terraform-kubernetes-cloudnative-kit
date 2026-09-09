@@ -8,7 +8,7 @@ variable "clients" {
   type        = map(string) # client_name => client_id
 }
 
-variable "client_roles" {
-  description = "Mapping de roles par client"
+variable "roles_by_client" {
+  description = "Rôles à créer, indexés par client : clé = nom du client, valeur = noms des rôles de ce client. Ex: { grafana = [\"grafana-admin\", \"grafana-editor\"] }"
   type        = map(list(string)) # client_name => ["admin", "readonly"]
 }

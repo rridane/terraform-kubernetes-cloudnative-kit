@@ -25,10 +25,10 @@ Liste plate des groupes Keycloak.
 Exemple :
 groups = [
   {
-    name         = "platform"
-    parent       = null
-    realm_roles  = ["platform.readonly"]
-    client_roles = { grafana = ["viewer"] }
+    name            = "platform"
+    parent          = null
+    realm_roles     = ["platform.readonly"]
+    roles_by_client = { grafana = ["viewer"] }  # clé = client, valeur = rôles de ce client
   },
   {
     name         = "platform/admins"
@@ -38,10 +38,10 @@ groups = [
 ]
 EOF
   type = list(object({
-    name         = string
-    parent       = string
-    realm_roles  = optional(list(string), [])
-    client_roles = optional(map(list(string)), {})
-    attributes   = optional(map(string), {})
+    name            = string
+    parent          = string
+    realm_roles     = optional(list(string), [])
+    roles_by_client = optional(map(list(string)), {})
+    attributes      = optional(map(string), {})
   }))
 }

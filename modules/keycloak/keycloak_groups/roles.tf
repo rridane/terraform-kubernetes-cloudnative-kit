@@ -12,7 +12,7 @@ locals {
 resource "keycloak_group_roles" "client_realm_group_roles" {
   for_each = {
     for g in var.groups : g.name => g
-    if length(g.realm_roles) > 0 || length(keys(g.client_roles)) > 0
+    if length(g.realm_roles) > 0 || length(keys(g.roles_by_client)) > 0
   }
 
   realm_id = var.realm_id
@@ -27,7 +27,7 @@ resource "keycloak_group_roles" "client_realm_group_roles" {
 
     # Client roles (flatten multi-clients)
     flatten([
-      for client_name, roles in each.value.client_roles : [
+      for client_name, roles in each.value.roles_by_client : [
         for role_name in roles :
         var.client_roles_ids["${client_name}-${role_name}"]
       ]

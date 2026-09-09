@@ -1,6 +1,6 @@
 locals {
   expanded_roles = flatten([
-    for client_name, roles in var.client_roles : [
+    for client_name, roles in var.roles_by_client : [
       for role in roles : {
         client_name = client_name
         client_id   = var.clients[client_name]
