@@ -34,6 +34,11 @@ locals {
           # qu'ArgoCD accepte de référencer le Secret via `$name:key` dans argocd-cm
           # (label `app.kubernetes.io/part-of: argocd` exigé). Si absent -> aucun label.
           secret_labels = lookup(p, "labels", null)
+          # Optionnel : clés du Secret K8s calculées par le moteur de template ESO à
+          # partir des valeurs Vault, à la place de la recopie clé par clé. Requis
+          # quand le Secret attendu ne reprend pas les clés Vault, ex. un
+          # .dockerconfigjson assemblé depuis username/token. Si absent -> recopie.
+          template_data = lookup(p, "template_data", null)
         }
       ]
     ]
@@ -113,17 +118,18 @@ resource "kubernetes_manifest" "external_secret" {
         name = each.value["secret_store_name"]
         kind = each.value["secret_store_kind"]
       }
-      # Quand un `type` et/ou des `labels` sont fournis, on passe par target.template
-      # pour que ESO produise un Secret typé (ex. basic-auth, exigé par Fleet) et/ou
-      # labellisé (ex. part-of: argocd) au lieu d'un simple Opaque sans label.
-      # Chaque clé fetchée est réinjectée via le moteur de template ESO pour préserver
-      # les données quand on active le templating.
+      # Quand un `type`, des `labels` et/ou un `template_data` sont fournis, on passe
+      # par target.template pour que ESO produise un Secret typé (ex. basic-auth,
+      # exigé par Fleet), labellisé (ex. part-of: argocd) et/ou aux clés calculées
+      # (ex. .dockerconfigjson) au lieu d'un simple Opaque sans label. Sans
+      # template_data, chaque clé fetchée est réinjectée via le moteur de template
+      # ESO pour préserver les données quand on active le templating.
       target = merge(
         {
           name           = each.value["external_name"]
           creationPolicy = "Owner"
         },
-        (each.value["secret_type"] == null && each.value["secret_labels"] == null) ? {} : {
+        (each.value["secret_type"] == null && each.value["secret_labels"] == null && each.value["template_data"] == null) ? {} : {
           # engineVersion / mergePolicy sont défaultés par le webhook ESO (v2 / Replace)
           # dès qu'un template est présent. On les déclare explicitement pour que le
           # contrôle de cohérence post-apply de kubernetes_manifest ne casse pas sur
@@ -132,7 +138,10 @@ resource "kubernetes_manifest" "external_secret" {
             {
               engineVersion = "v2"
               mergePolicy   = "Replace"
-              data          = { for k, _ in each.value["values"] : k => "{{ .${k} }}" }
+              data = (each.value["template_data"] != null
+                ? tomap(each.value["template_data"])
+                : tomap({ for k, _ in each.value["values"] : k => "{{ .${k} }}" })
+              )
             },
             each.value["secret_type"] == null ? {} : { type = each.value["secret_type"] },
             each.value["secret_labels"] == null ? {} : { metadata = { labels = each.value["secret_labels"] } }
