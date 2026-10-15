@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Catalogue Atmos des clients Keycloak",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "components": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "terraform": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "keycloak": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "vars": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "clients": {
+                      "type": "object",
+                      "additionalProperties": { "$ref": "../../../../modules/keycloak/keycloak_realm/schemas/client.schema.json" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

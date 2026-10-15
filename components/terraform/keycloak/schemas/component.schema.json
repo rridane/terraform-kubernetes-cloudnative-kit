@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Composant Atmos keycloak",
+  "type": "object",
+  "properties": {
+    "vars": {
+      "type": "object",
+      "properties": {
+        "clients": {
+          "type": "object",
+          "additionalProperties": { "$ref": "../../../../modules/keycloak/keycloak_realm/schemas/client.schema.json" }
+        }
+      }
+    }
+  }
+}
