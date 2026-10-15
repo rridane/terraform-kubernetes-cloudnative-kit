@@ -19,3 +19,12 @@ output "client_secrets" {
     client_name => client_res.client_secret
   }
 }
+
+output "service_account_user_ids" {
+  description = "Utilisateur technique des clients à compte de service (nom → id)."
+  value = {
+    for client_name, client_res in keycloak_openid_client.clients :
+    client_name => client_res.service_account_user_id
+    if client_res.service_accounts_enabled
+  }
+}
