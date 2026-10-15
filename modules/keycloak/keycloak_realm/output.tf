@@ -28,3 +28,8 @@ output "service_account_user_ids" {
     if client_res.service_accounts_enabled
   }
 }
+
+output "client_roles_ids" {
+  description = "Rôles de client (<client>-<rôle> → id), cf. variable client_roles_ids du module keycloak_groups."
+  value       = { for key, role in keycloak_role.client_roles : key => role.id }
+}

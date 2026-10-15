@@ -1,0 +1,25 @@
+{
+  "resource": {
+    "name": "Resource",
+    "access_type": "CONFIDENTIAL",
+    "standard_flow_enabled": false,
+    "redirect_uris": [],
+    "default_scopes": [],
+    "add_groups_to": { "id_token": false, "access_token": false, "userinfo": false },
+    "add_realm_roles_to": { "id_token": false, "access_token": false, "userinfo": false },
+    "roles": ["admin", "writer"]
+  },
+  "worker": {
+    "name": "Worker",
+    "access_type": "CONFIDENTIAL",
+    "standard_flow_enabled": false,
+    "service_accounts_enabled": true,
+    "redirect_uris": [],
+    "default_scopes": ["roles", "profile"],
+    "add_groups_to": { "id_token": false, "access_token": false, "userinfo": false },
+    "add_realm_roles_to": { "id_token": false, "access_token": false, "userinfo": false },
+    "client_roles_mapper": { "claim_name": "roles", "add_to_id_token": false, "add_to_userinfo": false },
+    "audience_mapper": { "included_client_audience": "resource", "add_to_id_token": false },
+    "service_account_roles": { "resource": ["writer"] }
+  }
+}

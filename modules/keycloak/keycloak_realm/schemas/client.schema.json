@@ -1,0 +1,143 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Client Keycloak",
+  "description": "Un élément de la variable clients du module keycloak_realm. La clé dans la map est le client_id.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["access_type", "redirect_uris"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nom affiché dans Keycloak."
+    },
+    "access_type": {
+      "enum": ["PUBLIC", "CONFIDENTIAL"],
+      "description": "PUBLIC : sans secret (CLI, SPA). CONFIDENTIAL : secret détenu côté serveur."
+    },
+    "standard_flow_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Authorization code (connexion par navigateur)."
+    },
+    "service_accounts_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Client credentials : le client agit sous son propre compte de service."
+    },
+    "pkce_code_challenge_method": {
+      "enum": ["S256", "plain", null],
+      "default": null,
+      "description": "PKCE. S256 pour les clients PUBLIC."
+    },
+    "implicit_flow_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Flux implicite, obsolète (OAuth 2.1)."
+    },
+    "direct_access_grants_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Resource owner password, obsolète (OAuth 2.1)."
+    },
+    "oauth2_device_authorization_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Device authorization grant (RFC 8628) : connexion depuis un terminal."
+    },
+    "redirect_uris": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "URI de redirection autorisées. [] sans authorization code."
+    },
+    "web_origins": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Origines CORS autorisées."
+    },
+    "default_scopes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": ["web-origins", "roles", "profile", "email", "microprofile-jwt"],
+      "description": "Client scopes toujours appliqués."
+    },
+    "optional_scopes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Client scopes appliqués sur demande (paramètre scope)."
+    },
+    "groups_claim": {
+      "type": "string",
+      "default": "groups",
+      "description": "Claim des groupes."
+    },
+    "realm_roles_claim": {
+      "type": "string",
+      "default": "realm-roles",
+      "description": "Claim des rôles du realm."
+    },
+    "add_groups_to": {
+      "$ref": "#/definitions/token_targets",
+      "default": { "id_token": true, "access_token": true, "userinfo": true },
+      "description": "Jetons qui reçoivent le claim des groupes."
+    },
+    "add_realm_roles_to": {
+      "$ref": "#/definitions/token_targets",
+      "default": { "id_token": true, "access_token": true, "userinfo": true },
+      "description": "Jetons qui reçoivent le claim des rôles du realm."
+    },
+    "client_roles_mapper": {
+      "type": ["object", "null"],
+      "default": null,
+      "description": "Rôles de client de l'utilisateur, tous clients confondus, dans un claim.",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "claim_name": { "type": "string", "default": "roles" },
+        "role_prefix": { "type": ["string", "null"], "default": null, "description": "Préfixe ajouté à chaque rôle." },
+        "multivalued": { "type": "boolean", "default": true },
+        "add_to_id_token": { "type": "boolean", "default": true },
+        "add_to_access_token": { "type": "boolean", "default": true },
+        "add_to_userinfo": { "type": "boolean", "default": true }
+      }
+    },
+    "audience_mapper": {
+      "type": ["object", "null"],
+      "default": null,
+      "description": "Ajoute un client à l'audience (aud) des jetons.",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "included_client_audience": { "type": ["string", "null"], "default": null, "description": "Client ajouté à aud. Défaut : ce client." },
+        "add_to_id_token": { "type": "boolean", "default": true },
+        "add_to_access_token": { "type": "boolean", "default": true }
+      }
+    },
+    "roles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true,
+      "default": [],
+      "description": "Rôles portés par ce client."
+    },
+    "service_account_roles": {
+      "type": "object",
+      "additionalProperties": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+      "default": {},
+      "description": "Rôles attribués au compte de service : client → rôles. Exige service_accounts_enabled."
+    }
+  },
+  "definitions": {
+    "token_targets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id_token", "access_token", "userinfo"],
+      "properties": {
+        "id_token": { "type": "boolean" },
+        "access_token": { "type": "boolean" },
+        "userinfo": { "type": "boolean" }
+      }
+    }
+  }
+}
