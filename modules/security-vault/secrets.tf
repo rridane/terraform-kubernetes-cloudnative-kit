@@ -1,6 +1,18 @@
 locals {
-  yaml_content = yamldecode(file(var.secret_config_file))
-  mounts       = local.yaml_content["mounts"]
+  secret_config_paths = (
+    var.secret_config_dir != null
+    ? [for file_name in sort(fileset(var.secret_config_dir, "*.yaml")) : "${var.secret_config_dir}/${file_name}"]
+    : [var.secret_config_file]
+  )
+  secret_configs = [for path in local.secret_config_paths : yamldecode(file(path))]
+
+  # Un mount déclaré dans plusieurs fichiers cumule leurs secrets.
+  mounts = {
+    for name in distinct(flatten([for config in local.secret_configs : keys(config["mounts"])])) : name => {
+      create  = anytrue([for config in local.secret_configs : try(config["mounts"][name]["create"], false)])
+      secrets = flatten([for config in local.secret_configs : try(config["mounts"][name]["secrets"], [])])
+    }
+  }
 
   # Vault KV secrets to create — one entry per (mount, name).
   all_secrets = flatten([
